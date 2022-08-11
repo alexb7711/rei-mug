@@ -1,4 +1,3 @@
-
 //===============================================================================
 // Modules
 
@@ -30,52 +29,53 @@ module print_dims(dim_name, points)
 // Creates the outermost cutout of the mug
 //
 // INPUT:
-// * p_size: Plate size
+// * p_size     : Plate size
 // * inner_dims : Dimensions of handle cutout
-// * thickness: Thicknesses of the upper, lower, and mug-adjacent sides
+// * thickness  : Thicknesses of the upper, lower, and mug-adjacent sides
+// * c_rad      : Curve radius of handle
+// * fn         : Quality of circles
 //
 // OUTPUT:
 // * Rough mug cutout
 //
-module rough_cutout(p_size, inner_dims, thickness)
+module rough_cutout(p_size, thickness, c_rad, fn)
 {
-  // Inner points (bottom left -> top left -> top right -> bottom right):w
-  ix1 = thickness[0]                 ; iy1 = thickness[2]             ;
-  ix2 = ix1                          ; iy2 = p_size[1] - thickness[2] ;
-  ix3 = thickness[0] + inner_dims[0] ; iy3 = iy2                      ;
-  ix4 = thickness[0] + inner_dims[1] ; iy4 = iy1                      ;
+  // Create the rounded corner version of cutout
+  translate([c_rad/2, c_rad/2, 0])
+  minkowski()
+  {
+    cube([p_size[0]-c_rad, p_size[1]-c_rad, p_size[2]/2]);
+    cylinder(r=c_rad/2, h=p_size[2]/2, $fn=fn);
+  }
 
-  // Handle points for polygon
-  inner_points  =
-    [
-      [ix1, iy1],
-      [ix1, iy2],
-      [ix3, iy2],
-      [4.4, 1.0]
-      ];
+  // Add in the squared off edges for the mug connection
+  translate([0, 0, 0])
+  cube([thickness[0], p_size[1], p_size[2]]);
+}
 
-  outer_points  =
-    [
-      [0.0, 0.0],
-      [0.0, p_size[1]],
-      [p_size[0], p_size[1]],
-      [p_size[0], 0.0]
-      ];
+//-------------------------------------------------------------------------------
+// Rough cutout of the handle grip
+//
+// INPUT:
+// *
+//
+// OUTPUT:
+// *
+//
+module rough_handle(p_size, thickness, c_rad, fn)
+{
+  // Scalar value
+  scale     = 1.1;
+  p_size    = [p_size[0]/scale, p_size[1]/scale, 2*p_size[2]];
+  thickness = thickness / scale;
 
-   handle_points = concat(inner_points, outer_points);
-
-  // Handle paths for polygon
-  inner_paths  = [[0,1,2,3]];
-  outer_paths  = [[4,5,6,7]];
-  handle_paths = concat(inner_paths, outer_paths);
-
-  // Create mug rough sketch
-  linear_extrude(height=p_size[2], center=false)
-    polygon(points=handle_points, paths=handle_paths);
-
-  // Debug info
-   print_dims("inner_points", inner_points);
-   print_dims("outer_points", outer_points);
+  // Create the rounded corner version of cutout
+  translate([(p_size[0] + c_rad)/7.5, (p_size[1] + c_rad)/10, -thickness[0]])
+  minkowski()
+  {
+    cube([p_size[0]-c_rad, p_size[1]-c_rad, p_size[2]/2]);
+    cylinder(r=c_rad/2, h=p_size[2]/2, $fn=fn);
+  }
 }
 
 //-------------------------------------------------------------------------------
@@ -108,20 +108,21 @@ module mug_contour(d, p, t, fn)
 fn = 30;
 
 // Cutout variables [cm]
+handle_curve_rad = 1;
 plate_size       = [5, 8.0, 2.2]; // (x,y,z) dimensions of the rectangle to cut out the handle
 inner_handle_dim = [3.0, 4.0];      // Top and bottom inner mug handle lengths
 handle_thickness = [0.4, 1.0, 1.0]; // Left, top, and bottom thicknesses
 mug_diameter     = 8.7;             // Diameter of mug
 
-/* color([0,1,0]) */
-/* translate([handle_thickness[0] + inner_handle_dim[0],plate_size[1]-handle_thickness[1],-plate_size[2]/7]) */
-/* cylinder(h=plate_size[2]+1, d=1, $fn=fn); */
-
 // Create handle
 difference()
 {
   // Rough cutout of handle
-  rough_cutout(plate_size, inner_handle_dim, handle_thickness);
+  rough_cutout(plate_size, handle_thickness, handle_curve_rad, fn);
+
+  // Rough cutout of inner handle
+  color([0,0,1])
+  rough_handle(plate_size, handle_thickness, handle_curve_rad, fn);
 
   // Cut away contour with mug
   mug_contour(mug_diameter, plate_size, handle_thickness, fn);
