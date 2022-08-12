@@ -49,7 +49,6 @@ module rough_cutout(p_size, thickness, c_rad, fn)
   }
 
   // Add in the squared off edges for the mug connection
-  translate([0, 0, 0])
   cube([thickness[0], p_size[1], p_size[2]]);
 }
 
@@ -57,24 +56,26 @@ module rough_cutout(p_size, thickness, c_rad, fn)
 // Rough cutout of the handle grip
 //
 // INPUT:
-// *
+// * p_size:
+// * thickness:
+// * c_rad:
+// * fn:
 //
 // OUTPUT:
-// *
+// * Handle cutout
 //
 module rough_handle(p_size, thickness, c_rad, fn)
 {
-  // Scalar value
-  scale     = 1.1;
-  p_size    = [p_size[0]/scale, p_size[1]/scale, 2*p_size[2]];
-  thickness = thickness / scale;
+  // Variables
+  x_cut = p_size[0] - thickness[0] - 2*thickness[1];
+  y_cut = p_size[1] - 3*thickness[1];
 
   // Create the rounded corner version of cutout
-  translate([(p_size[0] + c_rad)/7.5, (p_size[1] + c_rad)/10, -thickness[0]])
+  translate([c_rad/2+thickness[0], c_rad/2+thickness[1], -thickness[0]])
   minkowski()
   {
-    cube([p_size[0]-c_rad, p_size[1]-c_rad, p_size[2]/2]);
-    cylinder(r=c_rad/2, h=p_size[2]/2, $fn=fn);
+    cube([x_cut, y_cut, p_size[2]/2]);
+    cylinder(r=c_rad/2, h=p_size[2], $fn=fn);
   }
 }
 
@@ -109,10 +110,11 @@ fn = 30;
 
 // Cutout variables [cm]
 handle_curve_rad = 1;
-plate_size       = [5, 8.0, 2.2]; // (x,y,z) dimensions of the rectangle to cut out the handle
+plate_size       = [5, 8.0, 2.2];   // (x,y,z) dimensions of the rectangle to cut out the handle
 inner_handle_dim = [3.0, 4.0];      // Top and bottom inner mug handle lengths
 handle_thickness = [0.4, 1.0, 1.0]; // Left, top, and bottom thicknesses
 mug_diameter     = 8.7;             // Diameter of mug
+
 
 // Create handle
 difference()
@@ -125,5 +127,5 @@ difference()
   rough_handle(plate_size, handle_thickness, handle_curve_rad, fn);
 
   // Cut away contour with mug
-  mug_contour(mug_diameter, plate_size, handle_thickness, fn);
+  //mug_contour(mug_diameter, plate_size, handle_thickness, fn);
 }
