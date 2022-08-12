@@ -1,4 +1,8 @@
 //===============================================================================
+// Imports
+include <round-anything.scad>
+
+//===============================================================================
 // Modules
 
 //-------------------------------------------------------------------------------
@@ -64,19 +68,25 @@ module rough_cutout(p_size, thickness, c_rad, fn)
 // OUTPUT:
 // * Handle cutout
 //
-module rough_handle(p_size, thickness, c_rad, fn)
+module rough_handle(p_size, inner_dims, thickness, c_rad, fn)
 {
-  // Variables
-  x_cut = p_size[0] - thickness[0] - 2*thickness[1];
-  y_cut = p_size[1] - 3*thickness[1];
+  // Inner points (bottom left -> top left -> top right -> bottom right):w
+  ix1 = thickness[0]                 ; iy1 = thickness[2]             ;
+  ix2 = ix1                          ; iy2 = p_size[1] - thickness[2] ;
+  ix3 = thickness[0] + inner_dims[0] ; iy3 = iy2                      ;
+  ix4 = thickness[0] + inner_dims[1] ; iy4 = iy1                      ;
 
-  // Create the rounded corner version of cutout
-  translate([c_rad/2+thickness[0], c_rad/2+thickness[1], -thickness[0]])
-  minkowski()
-  {
-    cube([x_cut, y_cut, p_size[2]/2]);
-    cylinder(r=c_rad/2, h=p_size[2], $fn=fn);
-  }
+  // Handle points for polygon
+  inner_points  =
+  [
+    [ix1, iy1, 0],
+    [ix1, iy2, 0],
+    [ix3, iy2, c_rad],
+    [ix4, iy1, c_rad]
+  ];
+
+  translate([0,0,-0.5])
+  polyRoundExtrude(inner_points, p_size[2]*1.5, -1.5, -1.5, $fn=fn);
 }
 
 //-------------------------------------------------------------------------------
@@ -109,9 +119,9 @@ module mug_contour(d, p, t, fn)
 fn = 30;
 
 // Cutout variables [cm]
-handle_curve_rad = 1;
+handle_curve_rad = 0.5;
 plate_size       = [5, 8.0, 2.2];   // (x,y,z) dimensions of the rectangle to cut out the handle
-inner_handle_dim = [3.0, 4.0];      // Top and bottom inner mug handle lengths
+inner_handle_dim = [4.0, 4.0];      // Top and bottom inner mug handle lengths
 handle_thickness = [0.4, 1.0, 1.0]; // Left, top, and bottom thicknesses
 mug_diameter     = 8.7;             // Diameter of mug
 
@@ -124,8 +134,8 @@ difference()
 
   // Rough cutout of inner handle
   color([0,0,1])
-  rough_handle(plate_size, handle_thickness, handle_curve_rad, fn);
+    rough_handle(plate_size, inner_handle_dim, handle_thickness, handle_curve_rad, fn);
 
   // Cut away contour with mug
-  //mug_contour(mug_diameter, plate_size, handle_thickness, fn);
+  mug_contour(mug_diameter, plate_size, handle_thickness, fn);
 }
