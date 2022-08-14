@@ -85,8 +85,8 @@ module rough_handle(p_size, inner_dims, thickness, c_rad, fn)
     [ix4, iy1, c_rad]
   ];
 
-  translate([0,0,-0.5])
-  polyRoundExtrude(inner_points, p_size[2]*1.5, -1.5, -1.5, $fn=fn);
+  translate([0,0,-5])
+  polyRoundExtrude(inner_points, p_size[2]+thickness[1], -12, -12, $fn=fn);
 }
 
 //-------------------------------------------------------------------------------
@@ -107,9 +107,9 @@ module mug_contour(d, p, t, fn)
   // degrees, then draw the cylinder. Draw the cutout red to make it easy
   // to see.
   color([1,0,0])
-  translate([(t[0]-d)/2.0,-p[2]/5.0,p[2]/2.0])
+  translate([(t[0]-d)/2,-p[2]/5,p[2]/2])
   rotate([-90,0,0])
-    cylinder(h = p[1]+1, d = d, $fa=5, $fn=fn);
+    cylinder(h = p[1]+5, d = d, $fa=5, $fn=fn);
 }
 
 //-------------------------------------------------------------------------------
@@ -125,23 +125,23 @@ module mug_contour(d, p, t, fn)
 module mount_cutout(p, it)
 {
   // Mount cutout size
-  c_x   = 1;
-  c_y   = 0.6;
-  c_z   = 0.9;
+  c_x   = 10;
+  c_y   = 6;
+  c_z   = 9;
 
   // Center of mounts
   x_c   = 0;
-  y_c   = p[1]-0.2;
+  y_c   = p[1]-2;
   z_c   = (p[2]-c_z)/2;
 
   // Screw position
   x_spos = p[0]/2;
-  y_spos = p[1]-0.2-c_y;
+  y_spos = p[1]-2-c_y;
   z_spos = p[2]/2-c_z/2;
 
   // Bottom
   color([1, 0, 0.5])
-    translate([x_c, c_y+0.2, z_c])
+    translate([x_c, c_y+2, z_c])
     mirror([0,1,0])
     cube([c_x, c_y, c_z]);
 
@@ -154,13 +154,13 @@ module mount_cutout(p, it)
   // Screw
   color([1, 0.5,0])
   {
-    translate([0.75, p[1]-it[1]+0.1, p[2]/2])
+    translate([7.5, p[1]-it[1]+1, p[2]/2])
       rotate([90, 0, 0])
-      cylinder(d=0.5, h=0.5, $fn=100);
+      cylinder(d=5, h=5, $fn=100);
 
-    translate([0.75, p[1]-it[1]+0.2, p[2]/2])
+    translate([7.5, p[1]-it[1]+2, p[2]/2])
       rotate([90, 0, 0])
-      cylinder(d=0.3, h=0.3, $fn=100);
+      cylinder(d=3, h=3, $fn=100);
   }
 }
 
@@ -171,13 +171,13 @@ module mount_cutout(p, it)
 fn = 100;
 
 // Cutout variables [cm]
-handle_curve_rad = 0.5;
-plate_size       = [5, 8.0, 2.2];   // (x,y,z) dimensions of the rectangle to cut out the handle
-inner_handle_dim = [4.0, 4.0];      // Top and bottom inner mug handle lengths
-handle_thickness = [0.4, 1.0, 1.0]; // Left, top, and bottom thicknesses
-mug_diameter     = 8.7;             // Diameter of mug
+handle_curve_rad = 8;
+plate_size       = [50, 80, 22];   // (x,y,z) dimensions of the rectangle to cut out the handle
+inner_handle_dim = [40, 40];      // Top and bottom inner mug handle lengths
+handle_thickness = [4, 10, 10]; // Left, top, and bottom thicknesses
+mug_diameter     = 87;             // Diameter of mug
 
-//mount_cutout(plate_size, handle_thickness);
+//rough_handle(plate_size, inner_handle_dim, handle_thickness, handle_curve_rad, fn);
 
 // Create handle
 difference()
@@ -192,7 +192,5 @@ difference()
   mug_contour(mug_diameter, plate_size, handle_thickness, fn);
 
   // Cut away mount holes
-  mount_cutout(plate_size, handle_thickness);
-
   mount_cutout(plate_size, handle_thickness);
 }
