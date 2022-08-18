@@ -124,41 +124,50 @@ module mug_contour(d, p, t, fn)
 //
 module mount_cutout(p, it)
 {
+  // Thickness at top and bottom
+  t      = 2;
+
   // Mount cutout size
-  c_x   = 10;
-  c_y   = 6;
-  c_z   = 9;
+  ct_x   = 11;
+  ct_y   = 6.2;
+  ct_z   = 8.1;
+
+  cb_x   = 11;
+  cb_y   = 4;
+  cb_z   = 7.1;
 
   // Center of mounts
-  x_c   = 0;
-  y_c   = p[1]-2;
-  z_c   = (p[2]-c_z)/2;
+  xt_c   = 0;
+  yt_c   = p[1]-ct_y-2;
+  zt_c   = (p[2]-ct_z)/2;
+
+  xb_c   = xt_c;
+  yb_c   = 2;
+  zb_c   = (p[2]-cb_z)/2;
 
   // Screw position
-  x_spos = p[0]/2;
-  y_spos = p[1]-2-c_y;
-  z_spos = p[2]/2-c_z/2;
+  x_spos = 7.2;
+  y_spos = p[1]-it[1];
+  z_spos = p[2]/2;
 
   // Bottom
   color([1, 0, 0.5])
-    translate([x_c, c_y+2, z_c])
-    mirror([0,1,0])
-    cube([c_x, c_y, c_z]);
+    translate([xb_c, yb_c, zb_c])
+    cube([cb_x, cb_y, cb_z]);
 
   // Top
   color([1, 0.5, 0])
-    translate([x_c, y_c, z_c])
-    mirror([0,1,0])
-    cube([c_x, c_y, c_z]);
+    translate([xt_c, yt_c, zt_c])
+    cube([ct_x, ct_y, ct_z]);
 
   // Screw
-  color([1, 0.5,0])
+  color([0.5, 0.75, 0])
   {
-    translate([7.5, p[1]-it[1]+1, p[2]/2])
+    translate([x_spos, y_spos+1, z_spos])
       rotate([90, 0, 0])
-      cylinder(d=5, h=5, $fn=100);
+      cylinder(d=5.4, h=6, $fn=100);
 
-    translate([7.5, p[1]-it[1]+2, p[2]/2])
+    translate([x_spos, y_spos+2, z_spos])
       rotate([90, 0, 0])
       cylinder(d=3, h=3, $fn=100);
   }
