@@ -44,15 +44,15 @@ module print_dims(dim_name, points)
 module rough_cutout(p_size, thickness, c_rad, fn)
 {
   // Create the rounded corner version of cutout
-  translate([c_rad/2, c_rad/2, 0])
-  minkowski()
-  {
-    cube([p_size[0]-c_rad, p_size[1]-c_rad, p_size[2]/2]);
-    cylinder(r=c_rad/2, h=p_size[2]/2, $fn=fn);
-  }
+  outer_points  =
+  [
+    [0.0, 0.0, 0],
+    [0.0, p_size[1], 0],
+    [p_size[0], p_size[1], c_rad],
+    [p_size[0], 0.0, c_rad]
+  ];
 
-  // Add in the squared off edges for the mug connection
-  cube([thickness[0], p_size[1], p_size[2]]);
+  polyRoundExtrude(outer_points, p_size[2], 2, 2, 10);
 }
 
 //-------------------------------------------------------------------------------
