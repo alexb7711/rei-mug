@@ -46,13 +46,13 @@ module rough_cutout(p_size, thickness, c_rad, fn)
   // Create the rounded corner version of cutout
   outer_points  =
   [
-    [0.0, 0.0, 0],
-    [0.0, p_size[1], 0],
-    [p_size[0], p_size[1], c_rad],
-    [p_size[0], 0.0, c_rad]
+    [0.0       , 0.0      ,     0],
+    [0.0       , p_size[1],     0],
+    [p_size[0] , p_size[1], c_rad],
+    [p_size[0] , 0.0      , c_rad]
   ];
 
-  polyRoundExtrude(outer_points, p_size[2], 2, 2, 10);
+  polyRoundExtrude(outer_points, p_size[2], 4, 4, 10);
 }
 
 //-------------------------------------------------------------------------------
@@ -79,10 +79,10 @@ module rough_handle(p_size, inner_dims, thickness, c_rad, fn)
   // Handle points for polygon
   inner_points  =
   [
-    [ix1, iy1, c_rad/2],
+    [ix1, iy1, c_rad*2.3],
     [ix1, iy2, c_rad],
-    [ix3, iy2, c_rad],
-    [ix4, iy1, c_rad]
+    [ix3, iy2, c_rad/1.5],
+    [ix4, iy1, c_rad/1.5]
   ];
 
   translate([0,0,-5])
@@ -138,11 +138,11 @@ module mount_cutout(p, it)
 
   // Center of mounts
   xt_c   = 0;
-  yt_c   = p[1]-ct_y-2;
+  yt_c   = p[1]-ct_y-t;
   zt_c   = (p[2]-ct_z)/2;
 
   xb_c   = xt_c;
-  yb_c   = 2;
+  yb_c   = t + (p[1]-80)/2;
   zb_c   = (p[2]-cb_z)/2;
 
   // Screw position
@@ -165,7 +165,7 @@ module mount_cutout(p, it)
   {
     translate([x_spos, y_spos+1, z_spos])
       rotate([90, 0, 0])
-      cylinder(d=5.4, h=6, $fn=100);
+      cylinder(d=6, h=6, $fn=100);
 
     translate([x_spos, y_spos+2, z_spos])
       rotate([90, 0, 0])
@@ -181,10 +181,11 @@ fn = 100;
 
 // Cutout variables [cm]
 handle_curve_rad = 8;
-plate_size       = [50, 80, 22];   // (x,y,z) dimensions of the rectangle to cut out the handle
-inner_handle_dim = [40, 40];      // Top and bottom inner mug handle lengths
-handle_thickness = [4, 10, 10]; // Left, top, and bottom thicknesses
-mug_diameter     = 87;             // Diameter of mug
+plate_size       = [50, 95, 22];                                                 // (x,y,z) dimensions of the rectangle to cut
+                                   // out the handle
+inner_handle_dim = [40, 40];                                                     // Top and bottom inner mug handle lengths
+handle_thickness = [4, 10, 10];                                                  // Left, top, and bottom thicknesses
+mug_diameter     = 87;                                                           // Diameter of mug
 
 //rough_handle(plate_size, inner_handle_dim, handle_thickness, handle_curve_rad, fn);
 
