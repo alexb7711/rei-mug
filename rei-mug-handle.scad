@@ -142,7 +142,7 @@ module mount_cutout(p, it)
   zt_c   = (p[2]-ct_z)/2;
 
   xb_c   = xt_c;
-  yb_c   = t + (p[1]-80)/2;
+  yb_c   = t + (p[1]-80);
   zb_c   = (p[2]-cb_z)/2;
 
   // Screw position
